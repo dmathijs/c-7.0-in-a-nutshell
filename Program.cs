@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using c_7._0_in_a_nutshell.infra;
-using c_7._0_in_a_nutshell.chapters.chapter_2;
+using csharp7.infra;
+using csharp7.chapters.Chapter2;
+using csharp7.chapters.Chapter3;
 
-namespace c_7._0_in_a_nutshell
+namespace csharp7
 {
     class Program
     {
@@ -12,7 +13,8 @@ namespace c_7._0_in_a_nutshell
             Console.WriteLine("Hello World!");
 
             var modules = new List<ChapterModule>(){
-                new Chapter2()
+                new Chapter2(),
+                new Chapter3()
             };
 
             foreach(var module in modules){

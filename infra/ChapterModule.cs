@@ -1,13 +1,20 @@
 using System;
 
-namespace c_7._0_in_a_nutshell.infra
+namespace csharp7.infra
 {
     public abstract class ChapterModule{
 
+        private string name;
         public ChapterModule(string name){
-            Console.WriteLine($"Starting module {name}");
+            this.name = name;
+            Console.WriteLine($"Added module {name}");
         }
 
-        public abstract void Run();
+        public void Run(){
+            Console.WriteLine($"Running examples for {name}");
+            RunExamples();
+        }
+
+        public abstract void RunExamples();
     }
 }
