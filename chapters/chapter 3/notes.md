@@ -306,3 +306,91 @@ public enum BorderSides { None=0, Left=1, Right=2, Top=4, Bottom=8 }
 this will allow for things like ```BorderSides lelftRight = BorderSides.Left | BorderSides.Right;```
 
 **By Convention** the Flags attribute should always be applied to an enum type when its members are combinable. A flags enum is always given a plural name rather than a singular name.
+
+### Nested types
+Classes in classes, by default the access modifier is private instead of internal. It can also access private members in the class. The compiler heavily uses private classes to capture state.
+
+Nested type should be used because of its stronger access control restrictions.
+
+
+## Generics
+
+A generic type declares a **type parameter** ```public class Stack<T>``` 
+
+We can say that ```Stack<T>``` is an open type, whereas ```Stack<int>``` is a closed type. At runtime all generic type instances are closed, which means that they have the placeholder types filled in.
+
+**Generics exist to write code that is reusable across different types**, in the example above we could use the ```Stack``` type for both int or string.
+
+Everything could be done with objects but then there'd be a need for boxing/unboxing upcasting/downcasting which can not be checked at compile time.
+
+### Generic methods
+
+Declares type parameters in the signature of a method. A generic method is not classed as generic unless it _introduces_ type parameters. The pop method of a stack only uses the generic parameter of the type and is thus not considered a generic method.
+
+When using multiple type parameter, each parameter is prefixed with T but has a more descriptive name.
+
+The only way to specify an unbound generict type in C# is with the typeof operator
+```
+class A<T> {}
+class B<T1, T2>{}
+
+Type a = typeof(A<>) // unbound type
+type b = typeof(B<,>) // Use commas to indicate multiple generic type args
+```
+
+### Generic constraints
+
+```
+where T : base-class // Base-class constraint
+where T : interface // Interface constraint
+where T : class // Reference-type constraint
+where T : struct // Value-type constraint (excludes Nullable types)
+where T : new() // Parameterless constructor constraint
+where U : T // Naked type constraint
+```
+
+multiple constraints can be specified by using a comma. The constraints can be applied wherever the generic type parameters are defined.
+
+### Subclassing generic types
+
+A subclass of a generic class can leave the type parameters open or close the generic type parameters with a concrete type: ```SpecialStack<T>:Stack<T> vs. IntStack:Stack<int>```
+
+**Static data is unique for each closed type**
+
+### Type parameters and Conversions
+C#'s cast operator can perform several kinds of conversions including
+- Numeric conversions
+- Reference conversions
+- Boxing/Unboxing conversion
+- Custom conversion (Via operator overloading, see Chapter 4)
+
+Converting T to a specific type using explicit conversion will not compile as the compiler is concerned that you might have intended to use a custom conversion.
+
+A possibility is to first cast to an object. This works because conversions to/from object are assumed to not be custom conversions, but reference or boxing/unboxing conversions.
+
+### **Covariance**
+
+Assuming A is convertible to B, X has a covariant type parameter if ```X<A>``` is convertible to ```X<B>```.
+From C#4 interfaces allow covariant type parameters. E.g. IFoo has a covariant type parameter T if the following is possible 
+
+```
+IFoo<string> s = ...;
+IFoo<object> b = s;
+```
+Covariance is not always possible by default when implicit conversion is possible, sometime a constraint needs to be added to make it possible. Another solution is to have ```Stack<T>``` implement an interface with a covariant type parameter.
+
+#### Arrays
+
+Arrays support covariance. This means that cast to B[] can be cast to A[] if B is a subclass of A. Problem is that if B[] is casted to A[] another subclass (e.g. C) could be added to A[] which would cause a runtime error as the actual array type is still B.
+
+### Declaring a covariant type parameter
+
+As of c#4 type parameters on interfaces and delegates can be declared covariant by marking them with the out modifier. This ensures that unlike with arrays, covariant type parameters are fully type-safe.
+
+```
+public interface IPoppable<out T>{ T Pop(); }
+```
+
+the out modifier on T indicates that T is used only in output positions (e.g. return types for methods). The out keyword marks the type parameter as covariant.
+
+

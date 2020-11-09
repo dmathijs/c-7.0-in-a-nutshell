@@ -1,4 +1,5 @@
 using System;
+using static System.Console;
 using csharp7.infra;
 
 namespace csharp7.chapters.Chapter3
@@ -13,12 +14,25 @@ namespace csharp7.chapters.Chapter3
 
         public override void RunExamples(){
             IndexerExampleTest();
+            CovarianceExample();
         }
 
         private void IndexerExampleTest(){
 
             var indexer = new IndexerExample();
             Console.WriteLine(indexer[1]);
+        }
+
+        private void CovarianceExample(){
+
+            // Using a out parameter in our interface
+            // ensures type safety at runtime so that covariant type parameter is allowed
+            var stack = new Stack<Bear>();
+            stack.Push(new Bear());
+            IPoppable<Animal> animalStack = stack;
+
+            animalStack.Pop();
+            WriteLine($"{stack.items.Count} items in stack -> covariance possible using out parameter");
         }
     }
 
