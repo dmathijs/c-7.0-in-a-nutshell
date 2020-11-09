@@ -393,4 +393,14 @@ public interface IPoppable<out T>{ T Pop(); }
 
 the out modifier on T indicates that T is used only in output positions (e.g. return types for methods). The out keyword marks the type parameter as covariant.
 
+> Note that method parameters marked as out are not eligible for covariance due to a limitation in the CLR. 😲
 
+## Contravariance
+
+The inverse of covariance, if there's two types so that A is convertible to B then the generic type is contravriant if ```X<B>``` is convertible to ```X<A>```.
+
+Variance is exercised through the interface. It is clear that classes can't exercise variance as they typically need data to move out in both directions.
+
+## C++ Templates vs C# Generics
+
+C++ types are closed at compile time. while generic types in C# are closed at runtime, this allows libraries like System.Generic to export ```List<T>```
