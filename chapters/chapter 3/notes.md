@@ -229,7 +229,7 @@ Every object has a ToString() method this method can be overriden by using the i
 
 ### Structs
 
-struct is value type. And does not support inheritance.
+struct is value type. And does not support inheritance (**Interface inheritance is supported**).
 Structs can not have
 - A parameterless constructor
 - Field initializers (class fields)
@@ -263,3 +263,46 @@ Interface members are always implicitly public and cannot declare any access mod
 Interfaces can inherit other interfaces
 
 Implementing multiple interfaces can sometimes result in a collision between member signatures. You can resolve such collisions by explicitly implementing an interface member. See example.
+The only way to call an interfaces' method would be to cast them to the interface.
+
+An implemented interface member is by default sealed, it needs to be marked virtual or abstract to be overriden in a further subclass.
+
+### Reimplementing an interface in a subclass.
+
+If a baseclasses' implementation is not marked virtual or abstract, the subclass can still override behaviour by re-implementing the same interface. Thsi is called **'reimplementation hijacking'**
+
+### Alternatives to interface reimplementation
+
+There are 2 problems with reimplementation hijacking
+1. The subclass has no way to call the base class
+2. The original author may not have anticipated reimplementation causing specific issues
+
+It is better to either make any implicit implementation of the member virtual if change is anticipated or do the following pattern
+
+```
+public class TextBox : IUndoable
+{
+    void IUndoable.Undo() => Undo();
+    protected virtual void Undo() => { ... }
+}
+```
+
+If no anticipation of subclassing, mark the class sealed to preempt interface reimplementation.
+
+## Enums
+
+Compiler will continue incrementing from the last explicit value in the enum.
+The first member of enum is often used as the "default" vlaue.
+
+### Flag Enums
+
+It is possible to combine enum members.  Members of combinable enum require explicitly assigned values, typically in the powers of two
+
+```
+[Flags]
+public enum BorderSides { None=0, Left=1, Right=2, Top=4, Bottom=8 }
+```
+
+this will allow for things like ```BorderSides lelftRight = BorderSides.Left | BorderSides.Right;```
+
+**By Convention** the Flags attribute should always be applied to an enum type when its members are combinable. A flags enum is always given a plural name rather than a singular name.
