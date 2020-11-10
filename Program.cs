@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using csharp7.infra;
 using csharp7.chapters.Chapter2;
 using csharp7.chapters.Chapter3;
+using csharp7.chapters.Chapter4;
 
 namespace csharp7
 {
@@ -14,7 +15,8 @@ namespace csharp7
 
             var modules = new List<ChapterModule>(){
                 new Chapter2(),
-                new Chapter3()
+                new Chapter3(),
+                new Chapter4()
             };
 
             foreach(var module in modules){
