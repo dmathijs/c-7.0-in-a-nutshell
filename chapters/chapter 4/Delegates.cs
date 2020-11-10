@@ -25,11 +25,8 @@ namespace csharp7.chapters.Chapter4{
 
     public delegate void PriceChangedHandler (int oldPrice, int newPrice);
 
-    public class BroadCaster(){
+    public class BroadCaster{
         
         public event PriceChangedHandler PriceChanged;
-
-        
     }
-    
 }
