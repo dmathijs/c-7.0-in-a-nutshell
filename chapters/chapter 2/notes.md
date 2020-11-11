@@ -23,7 +23,7 @@ console.writeline
 ### Predefined types
 
 predefined types are types that are specially supported by the compiler e.g. int
--> stored in 32 bit.
+-> stored in 32 bit. int is an alias for Int32 (which is a struct)
 Other examples are the string type and the bool type.
 
 ### Custom types

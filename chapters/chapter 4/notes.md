@@ -157,6 +157,190 @@ Anonymous methods (C#2) are the precurser of lambda expressions (C#3),  they lac
 ```
 delegate int Transformer (int i);
 
-Transformer sqr = delegate(int x) { return x * x;} // Notice the statement block and the explicit types
+Transformer sqr = delegate (int x) { return x * x;} // Notice the statement block and the explicit types
 
 ```
+
+## Try statements and exceptions
+
+finally is usefull for task cleanup. Checking for preventable errors is preferabel to relying on try/catch because exceptions are relatively expensive to handle, taking hundreds of clock cycles or more.
+
+If exception is thrown, the CLR performs a test: Is execution currently within a try statement that can catch the exception?
+
+- If so, execution is passed to the compatible catch block
+- If not, execution jumps back to the caller of the function and the test is repeated (is the caller part of a try statement)
+
+Catching ```System.Exception``` catches all possible errors. 
+
+Since C#6, there is also the possibility to add **exception filter** in a catch clause
+```
+catch(WebException ex) when (ex.Status == WebExceptionStatus.Timeout)
+{
+    ...
+}
+```
+
+### The finally block
+The finally block always executes--wheter or not an exception is thrown and whether or not the try block runs to completion.
+
+Exceptions are thrown either by the CLR or by user code (using the throw statement)
+
+Rethrowing a less specific exception (using throw; vs using throw ex;) is something you might do when crossing a
+trust boundary, so as not to leak technical information to potential hackers.
+
+### The TryXXX Method Pattern
+
+Return a bool value and the specific return value with the out keyword.
+
+## Enumeration and iterators
+
+An enumerator is a read-only, forward-only cursor over a sequence of values. It implements either of the following interfaces
+
+- ```System.Collections.IEnumerator```
+- ```System.Collections.Generic.IEnumerator<T>```
+
+An enumerablel is a logical representation of a sequence that produces cursors over itself.
+- ```Implements IEnumerable or IEnumerable<T>```
+- Has a method named ```GetEnumerator``` that returns an enumerator.
+
+### Iterators
+
+Iterators are producers of an enumerator. Foreach statement is a consumer of the enumerator
+
+The compiler converts iterator methods into private class that implement ```IEnumerable<T>``` and/or ```IEnumerator<T>``` None of the code actually runs when you call an iterator method, only the class gets initialized. When the enumeration starts, only then do the items get created.
+
+**yield return statement cannot appear in a try block that has a catch clause. Nor can the yield return appear in a catch or finally block.** These restrictions are due to the fact the compiler must translate iterators into ordinary clasess with MoveNext, Current and Dispose members. adding exception handling would create **exessive complexity**
+
+### Composing sequences
+
+*The important lesson is that the next iteration is not called until MoveNext() is called.*
+
+## Nullable types
+
+Using the Nullable<T> struct allows for value types to be nullable.
+
+The conversion from T to T? is implicit but from T? to T the conversion has to be explicit.
+
+When T? is boxed (value to reference conversion) the heap contains T, not T?.
+
+### **Operator Lifting**
+
+The Nullable<T> struct does not define operators such as <, > or even == Despite that two nullables can still be compared e.g. ```int? x = 5, y = 2; bool b = x < y // True```
+
+This works because the compiler borrows or lifts, the less-than operator from the underlying value type.
+
+the preceding comparison is semantically translated into this:
+```bool b = (x.HasValue && y.HasValue) ? (x.Value < y.Value) : false; ```
+
+> Each of the predefined types (int, double, ..) is shorthand for a system-provided type (Int32, Double64). For example the keyword int refers to the struct System.Int32. As a matter of style, use of the keyword is favoured over use of the complete system name.
+
+It is possible to mix nullable and non-nullable types because there's an implicit conversion from non-nullable to nullable.
+
+### Nullable types and null operators
+
+Nullable types can be usefull when working with e.g. database programming, there one would probably have nullable collumns to indicate that the column doesn't contain any value.
+
+**An ambient property** is a property that returns it's parent Value if itself is null.
+
+It is possible to generate an array whose lower bound is 1 instead of 0:
+```
+Array a = Array.CreateInstance(typeof(string), new int[] {2}, new int[] {1});
+```
+
+Before nullable types (Structs) were part of C#, there was a strategy to designate a particular non-null value as the "null value"; an example is in an array that whe doing x.IndexOf() it will return -1 if it's not in the collection.
+
+Nominating a "magic value" like this is problematic for the following reasons:
+- Each value type has it's own different representation of the value "Null"
+- There may be no reasonable designated values
+- Forgetting to check the magic number would result in an incorrect valuel that may go unnoticed. Using Nullable, calling the value without checking hasValue would throw ``` InvalidOperationException```.
+
+## Extension Methods
+
+Extension methods allow an existing type to be extended with new methods without altering the definition of the original type.
+
+The compiler will compile extension methods as static methods on the type itself. **Interfaces can also be extended**
+
+Extension methods allow for chaining.
+
+Important ambiguity
+- An extension method cannot be accessed untill its class is in scope
+- Instance method will always take precedence over extension method
+- The more specific implementation of an extension method will take precedence
+  
+## Anonymous types
+
+Anonymous type is a simple class created by the compiler to store a set of values on the fly.
+```
+var dude = new { Name = "Bob", Age = 23}; // will get compiled to class with 2 properties
+
+var Y = 4;
+// Underlying anonymous types will have the same type
+var a1 = new { X = 2, Y }
+var a2 = new { X = 3, Y = 2}
+
+```
+
+If a method should return an anonymous object you should use **dynamic**, this is because functions can't return var. Anonymous types are used primarily when writing LINQ queries.
+
+## Tuples
+
+tuples are value types, with mutable elements. 
+Optionally a name can be given to tuples.
+
+```
+var tuple = (Name:"Bob", Age:23)
+
+WriteLine(tuple.Name); // Bob
+```
+Note that these elements can still be treated as unnamed and refered to as Item1 and Item2. Tuples are type-compatible (assignable) if their element types match up.
+
+(string, int) is an alias for the ```ValueTuple<string, int> tuple```. At runtime references to the "names" of tuple names will be removed. When debugging an assembly you'll see that the tuple names are not there.
+
+### Deconstructing tuples.
+
+Tuples can be deconstructed into their separate variables
+```
+(string name, int age) = bob;
+```
+
+### System.Tuple vs ValueTuple
+
+The system.tuple is a class that represents a tuple, after its introduction it was considered a mistake. The structs had a slight performance advantage compared to the class with almost no downside. That's why you can still come across System.Tuple in some code.
+
+## Attributes
+
+Attributes are an extensible mechanism for adding custom information to code elements.
+
+A good example of attributes usage is serialization. In this scenario, an attribute on a field can specify the translation between C#'s representation of the field an the format's representation of the field.
+
+Attributes inherit System.Attribute. **By convention, all attribute types end in the word Attribute, C# recognizes this and allow you to omit the suffix when attaching an attribute**
+
+### Named and positional attribute parameters
+
+Positional parameters correspond to parameters of the attribut type's public constructors. Named parameters correspond to public fields or public properties on the attribute type.
+
+Multiple attributes can be specified by using commas between the attributes and/or using multiple pairs of square brackets
+
+## Caller Info Attributes
+
+from C# 5 you can tag optional parameters with one of the three caller info attributes
+which instructs the compiler to feed information obtained from the caller's source code into the parameter's default value
+
+```
+public void Foo (
+    [CallerMemberName] string memberName = null,
+    [CallerFilePath] string filePath = null,
+    [CallerLineNumber] int lineNumber = 0
+)
+```
+
+## Dynamic Binding
+
+Dynamic binding deferes binding (the process of resolving types, members and operations) from compile time to runtime. Dynamic binding is useful when at compile time you know that a certain function, member, or operation exists, but the compiler does not. Usefull when operating with dynamic languages and COM.
+
+A dynamic type is declared with the contextual keyword dynamic ```dynamic d = GetSomeObject();```
+
+### Static binding
+
+When calling a method on an object. The compiler is going to search on the types for that method. Failing that, it will continue it's search on extension methods or base classes. If not found it will throw a compilation error. The binding depends on statically knowing the types of the operands. This makes it static binding.
+

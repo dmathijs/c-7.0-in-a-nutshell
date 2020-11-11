@@ -2,6 +2,7 @@ using System;
 using static System.Console;
 using csharp7.infra;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace csharp7.chapters.Chapter4
 {
@@ -16,6 +17,9 @@ namespace csharp7.chapters.Chapter4
         public override void RunExamples(){
             DelegateExample();
             LoopExampleToShowVariablesCapturedOutsideContext();
+            EnumeratorExample();
+            IteratorExample();
+            CallerPathExample();
         }
 
         private void DelegateExample(){
@@ -44,6 +48,34 @@ namespace csharp7.chapters.Chapter4
             foreach(var action in actions){
                 action();
             }
+        }
+
+        private void EnumeratorExample(){
+
+            IEnumerable<char> test = "hey";
+
+            var enumerator = test.GetEnumerator();
+
+            while(enumerator.MoveNext()){
+                Console.Write(enumerator.Current);
+            }
+
+            WriteLine("");
+        }
+
+        private void IteratorExample()
+        {
+            IEnumerable<char> test(){
+                foreach(var x in "test"){
+                    yield return x;
+                }
+            }
+
+            Console.WriteLine(test());
+        }
+
+        private void CallerPathExample([CallerFilePath] string filePath = null){
+            WriteLine($"The filepath is: {filePath}");
         }
     }
 }
