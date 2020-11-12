@@ -344,3 +344,73 @@ A dynamic type is declared with the contextual keyword dynamic ```dynamic d = Ge
 
 When calling a method on an object. The compiler is going to search on the types for that method. Failing that, it will continue it's search on extension methods or base classes. If not found it will throw a compilation error. The binding depends on statically knowing the types of the operands. This makes it static binding.
 
+When using *dynamic* the object binds at runtime based on its runtime type. If a dynamic object implements IDynamicMetaObjectProvider, that interface is used to perform the binding **(custom binding).** The normal way is called **language binding**.
+
+### Custom binding
+
+Is usefull when object is acquired from a dynamic language  e.g. Python.
+
+By design, runtime binding behaves as similar as possible to static binding. The most notable exception in parity between static and dynamic binding is for extension methods (see later)
+
+> Dynamic binding also incurs a performance hit. Because of the DLR (Dynamic language runtime)'s caching mechanisms, however, the typical overhead of dynamic expressions is limited in case of loops.
+
+Structurally there's no difference between an object reference and a dynamic reference. A dynamic reference simply enables dynamic operations on the object it points to.
+
+### Dynamic conversions
+
+```
+int i = 7;
+dynamic d = i;
+long j = d; // No exception
+```
+
+The above works because implicit conversion from int to long is possible. The other way around wouldn't be possible because explicit conversion (loss of information) is necessary.
+
+### var vs dynamic.
+
+- var: let the compiler figure out the type
+- dynamic: let the runtime figure out the type
+
+### Dynamic expressions
+
+Trying to consume the result of a dynamic expression with a void return type is prohibited, just like with a statically typed expression:
+```
+dynamic list = new List<int>();
+var result = list.Add(5); // RuntimeBinderException thrown
+```
+
+### Dynamic calls without dynamic receivers
+
+The canonical use case for dynamic involves a dynamic receiver. This means that a dynamic object is the receiver of a dynamic function call.
+
+### Uncallable functions
+
+Some functions cannot be called dynamically 
+- Extension methods (via extension method syntax)
+- Members of an interface. cast to the interface.
+- Base members hidden by a subclass (using the 'new' inheritance modifier)
+
+In al 3 cases there's a second class that can not be resolved/found at runtime. When cast to an interface, the dynamic won't be able to find its implementation.
+
+## Operator Overloading
+
+An operator is overloaded by declaring an operator funciton. An operator function has the following rules
+
+- The name of the function is specified with the operator keyword followed by an operator symbol.
+- Operator function must be marked static/public
+- parameters represent the operands
+- the return type represents the result of an expression
+- one of the operands must be the declared type
+
+```
+public struct Note
+{
+    int value;
+    public Note (int semitonesFromA) { value = semitonesFromA; }
+    public static Note operator + (Note x, int semitones)
+    {
+        return new Note (x.value + semitones);
+    }
+}
+```
+

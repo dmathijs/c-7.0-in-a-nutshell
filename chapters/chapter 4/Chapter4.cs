@@ -20,6 +20,8 @@ namespace csharp7.chapters.Chapter4
             EnumeratorExample();
             IteratorExample();
             CallerPathExample();
+            CheckDynamicBinding();
+            TestUnsafeVoidPointer();
         }
 
         private void DelegateExample(){
@@ -76,6 +78,31 @@ namespace csharp7.chapters.Chapter4
 
         private void CallerPathExample([CallerFilePath] string filePath = null){
             WriteLine($"The filepath is: {filePath}");
+        }
+
+        private void CheckDynamicBinding(){
+            dynamic duck = new Duck();
+
+            duck.Quack();
+        }
+
+        unsafe static void TestUnsafeVoidPointer(){
+            short[] a = {1,1,2,3,5,8};
+            fixed(short* p = a){
+                Zap(p, a.Length * sizeof(short));
+            }
+
+            foreach(short x in a){
+                WriteLine(x);
+            }
+        }
+
+        unsafe static void Zap(void* memory, int byteCount){
+            byte* b = (byte*) memory;
+            for(int i = 0; i < byteCount; i++){
+                // set b equal to 0 and then increase
+                *b++ = 0;
+            }
         }
     }
 }
