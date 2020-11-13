@@ -23,8 +23,8 @@ console.writeline
 ### Predefined types
 
 predefined types are types that are specially supported by the compiler e.g. int
--> stored in 32 bit. int is an alias for Int32 (which is a struct)
-Other examples are the string type and the bool type.
+-> stored in 32 bit. int is an alias for System.Int32 (which is a struct)
+Other examples are the string type and the bool type, and all other numeric types except decimal.
 
 ### Custom types
 
@@ -71,7 +71,7 @@ From C# 7 onwared numeric literals can also be made more readable
 int million = 1_000_000;
 ```
 Numeric suffixes can be used to make clear what type needs to be used. e.g. var x = 1L (will be a long). The only real necessary suffixes are F (float) and M (decimal). Because doing 
-```float m = 4.5;``` _is impossible_ as no implicit conversion of bool to float exists.
+```float m = 4.5;``` _is impossible_ as no implicit conversion of double to float exists.
 
 ## Arithmetic Operators
 
@@ -145,7 +145,7 @@ block of memory for storing local variables and parameters, the stack logically 
 
 block of memory in which objects (i.e. reference-type instances reside). References are cleaned up by the garbage collector. It's impossible to explicitely delete objects in c#
 
-**The heap also contains all static fields. These live until hte appplication domain is torn down.**
+**The heap also contains all static fields. These live until the appplication domain is torn down.**
 
 default values is equal to bitwise zeroing of memory. e.g. for reference types this will mean that all the values are null. Default value can be obtained by writing ```default(string)```
 
@@ -228,7 +228,7 @@ x = y = 3 // will first put y equal to 3
 
 C# has the following mechanisms to conditionally control the flow fo program execution
 - Selection statements (if, switch)
-- Conditional operator (?:)
+- Conditional operator (?.)
 - Loop statements (while, do..while, for)
 
 the switch statement can beused with patterns
@@ -280,9 +280,9 @@ WriteLine("This works");
 
 ```
 
-Classes in the Inner namespace can always access classes in the outer namespace. If you want to refer to a type in a different branch of the namespace hierarchy, you can use a partially qualified name. e.g. Middle.Inner.xxx;
+Classes in the Inner namespace can always access classes in the outer namespace. If you want to refer to a type in a different branch of the namespace hierarchy, you can use a **partially qualified name**. e.g. Middle.Inner.xxx;
 
-When refering to type pwith the same name in inner and outer namespaces. The inner one will always win. Using the outer one will have to be done using it's qualified name.
+When refering to type with the same name in inner and outer namespaces. The inner one will always win. Using the outer one will have to be done using it's qualified name.
 
 Namespaces can be repeated as long as there are no conflict in class names.
 

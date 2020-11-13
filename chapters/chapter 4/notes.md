@@ -414,3 +414,142 @@ public struct Note
 }
 ```
 
+### Custom implicit and explicit conversions
+
+Implicit and explicit conversions are overloadable operators. this is done by adding the *implicit* and *explicit* keyword.
+
+```
+// Convert to hertz (expression body)
+public static implicit operator double (Note x)
+=> 440 * Math.Pow (2, (double) x.value / 12 );
+```
+
+It is important to note that between weakly related types it is better to use a ToXXX method and a FromXXX method.
+
+> **Custom conversions are ignored by the is and as operators.**
+
+## Unsafe code and pointers
+
+C# supports direct memory manipulation via pointers within blocks of code marked unsafe and compile with the /unsafe compiler option. Pointers may be used for interoperability with C APIs but also for accessing memory outside the managed heap.
+
+Pointer operators
+
+- & -> **the address-of operator** returns a pointer to the address of a variable
+- \* -> **the deference operator**  returns the variable at the address of a pointer
+- -> -> **the point-to-member operator**  is a syntatic shortcut, x->y is equivalent to (*x).y
+
+```
+unsafe void BlueFilter (int[,] bitmap)
+{
+    int length = bitmap.Length;
+    fixed (int* b = bitmap)
+    {
+        int* p = b;
+        for (int i = 0; i < length; i++)
+            *p++ &= 0xFF; // Sets blue to all ones.
+    }
+}
+```
+
+### The fixed statement
+
+During runtime, the garbage collector will allocate and deallocate objects on the heap (move around) to prevent unnecessary waste or fragmentation of memory. The fixed statement tells the garbage collector that the object should be "pinned" and thus not moved. It is important for the efficiency of the runtime that this fixed block is used only briefly.
+
+Within the fixed statement, you can get a pointer to any value type, an array of value types or a string. In case of array or strings the pointer will point to the first item.
+
+### Arrays
+
+#### the stackaloc keyword
+
+Memory can be allocated in a block on the stack explicitly using the stackalloc keyword. Since it is allocated on the stack, it's lifetime is limited to the execution of the method.
+```int* a = stackalloc int[10];```
+
+The fixed keyword has another use, create fix-sized buffers in structs
+
+```
+unsafe struct Block
+{
+    public short Length;
+    public fixed byte Buffer[30]; // fixed means fixed in place and fixed in size
+}
+```
+
+### void*
+
+A void pointer makes no assumptions about the type of the underlying data and is useful for functions that deal with raw memory.
+
+## Preprocessor Directives
+
+Preprocessor directives supply the compiler with additional information about regions of code.
+
+E.g.
+```
+#define DEBUG
+class Myclass{
+
+    void Foo()
+    {
+        #if DEBUG
+        Console.WriteLine("Testing: x = {0}", x);
+        #endif
+    }
+}
+```
+
+with #if #elif you can use ||, && and ! operators.
+
+### Conditional attributes
+
+An attribute with the Conditional attribute will be compiled only if a given preprocessor symbol is present
+
+```
+[Conditional("Debug")]
+public class TestAttribute : Attribute {}
+
+#define DEBUG
+[Test]
+class Foo
+{
+    [Test]
+    string s;
+}
+
+```
+
+The compiler will only incorporate the Test attributes if the DEBUG symbol is in scope.
+
+### Pragma warning
+
+The compiler generates a warning when it spots something in your code that seems unintentional. In a large application it is essential that the "real" warnings get noticed.
+
+For this you can use the pragma directive to not warn us about something not being used:
+
+```
+public class Foo {
+
+    #pragma warning disable 414
+    static string Message = "Hello";
+    #pragma warning restore 414
+}
+```
+
+## XML Documentation
+
+When using xml documentation, compiling with /doc directive will the compiler generate documentation comments in a single XML file.
+
+Standard XML Documentation tags
+- \<summary> -> tooltip intellisense should display
+- \<remarks>
+- \<param>
+- \<returns>
+- \<exception>
+- \<permission>
+- \<example>
+- \<c> -> inline code snipit, this tag is usually withing the example tag
+- \<code> -> multiline code sample
+- \<see> -> cross-reference to another type or member (Use specific ID to other members, e.g. F:NS.MyClass.aField)
+
+F -> field (T for type)
+NS -> namespace 'NS'
+MyClass -> className
+aField -> fieldName

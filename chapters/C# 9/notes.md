@@ -60,7 +60,7 @@ Replacement of the main method. No namespace definition required. If the compile
 
 ## Pattern matchin enhancements
 
-New and, or and not keyword. e.g. ```x = e is not null```.
+New and, or and not keyword. e.g. ```x = e is not null``` instead of ```x = !(e is null)```.
 
 ## Performance and interop.
 

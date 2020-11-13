@@ -13,7 +13,7 @@ Allowed modefiers
 | Threading modifier | volatile |
 
 
-#### Field initialization
+### Field initialization
 Field initializers are run **before** the constructor
 They can be intialized on one line if the modfieres are the same. e.g.
 ```
@@ -85,7 +85,7 @@ Get and set accessors can have different access levels. typically the setter cou
 
 ### CLR property implementation
 
-C# propertiy accessors internally compile to methods called get_XXX and set_XXX. If it's a simple non-virtual property the accessors are inlined by the JIT compiler eleminating any performance between accessing a property and a field.
+C# property accessors internally compile to methods called get_XXX and set_XXX. If it's a simple non-virtual property the accessors are inlined by the JIT compiler eleminating any performance between accessing a property and a field.
 
 ### Indexers
 
@@ -152,11 +152,11 @@ long x = 3 as long; // Compile-time error
 The is operator tests wheter a reference conversion would succeed;
 ```If (a is Stock s)``` allows for s to be used as a stock and ensure that a is of type Stock
 
-### Virutal function members
+### Virtual function members
 
 Functions marked as virtual can be overridden by subclasses wanting to provide a specialized implementation. A subclass overrides a virtual method by using the override modifier.
 
-It is dangerous to call virutal methods in a constructor as the author of subclasses don't knwo that it will be accessing methods or properties that rely on fields not yet initialized by the constructor
+It is dangerous to call virtual methods in a constructor as the author of subclasses don't know that it will be accessing methods or properties that rely on fields not yet initialized by the constructor
 
 ### Abstract classes
 
@@ -199,7 +199,7 @@ When calling overloads with sub/base classes, the most specific type will always
 object _(System.Object)_ is the ultimate base calss for all types any type can be upcast to object.
 A stack is LIFO.
 
-Int can also be casted to an object (even though being a value type). This feature of C# is calle dtype unification.
+Int can also be casted to an object (even though being a value type). This feature of C# is called **type unification**.
 
 When you cast between a value type and an object, the CLR must perform some special work to bridge the difference in semantics between reference and value type. This process is called boxing and unboxing.
 
@@ -269,7 +269,7 @@ An implemented interface member is by default sealed, it needs to be marked virt
 
 ### Reimplementing an interface in a subclass.
 
-If a baseclasses' implementation is not marked virtual or abstract, the subclass can still override behaviour by re-implementing the same interface. Thsi is called **'reimplementation hijacking'**
+If a baseclasses' implementation is not marked virtual or abstract, the subclass can still override behaviour by re-implementing the same interface. This is called **'reimplementation hijacking'**
 
 ### Alternatives to interface reimplementation
 
