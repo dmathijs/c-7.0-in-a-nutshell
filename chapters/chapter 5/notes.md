@@ -8,7 +8,7 @@ The .NET Framework is exposed via a set of managed types organized in hierarchic
 
 ### .NET Standard 2
 
-Making .NET Standard-compliant libraries, these will be usable accross .NET framework, .NET core and Xamarin.
+Making .NET Standard-compliant libraries, these will be usable across .NET framework, .NET core and Xamarin.
 
 ### Reference Assemblies
 
@@ -16,7 +16,7 @@ Assemblies are refrerence to be able to use their functionality. The ones you lo
 
 ## The CLR and Core Framework
 
-System namespice contains C#'s built-in types, the Exception base class, the Enum, Array and Delegate, Nullable, Type, DateTime, TimeSpan and Guid.. GC class for interacting with the garbage collector.
+System namespace contains C#'s built-in types, the Exception base class, the Enum, Array and Delegate, Nullable, Type, DateTime, TimeSpan and Guid.. GC class for interacting with the garbage collector.
 
 ## ASP.NET
 
