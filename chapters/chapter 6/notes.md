@@ -184,3 +184,144 @@ A stringbuilder can also use the composite format using 'AppendFormat'
 ### Parsing with format providers
 
 Each type overloads its static Parse and TryParse method to accept a format provider in which such things as whether parantheses or a currency symbol can appear in the input string.
+
+#### IFormatProvider and ICustomFormatter
+
+Implement IFormatProvider to return a customformatter, which in it's turn implements ICustomFormatter which allows the custom formatting to happen.
+
+## Standard Format Strings and Parsing Flags
+
+- Standard format strings
+  - With these you give additional guidance, they are a character, optionally followed by a digit. E.g. C or F2
+- Custom format strings
+  - With these, you micromanage every character with a template, An example is "0:#.000E+00"
+
+When no standard format string is passed, **the default "G"** will be used.
+
+### NumberStyles
+
+Each numeric type defines a static Parse method that accepts a NumberStyles flags enum value. It has multiple combinable members. It also has composite members: e.g. Integer, Float, CUrrency, ... all these composites include 'AllowLeadingWhite' and 'AllowTrailingWhite'
+
+### DateTimeStyles
+
+Just like the NumberStyles, the DateTimeStyles is a flag enum that provides additional instructions when calling Parse on the DateTime(Offset) object.
+
+### EnumFormatStrings
+
+Same as NumberStyles/DateTimeStyles
+
+## Other Conversion mechanisms
+
+- The **Convert** class and its functions:
+  - Real to integral conversions that round rather than truncate
+  - Parsing numbers in base 2, 8 and 16
+  - Dynamic conversions
+  - Base 64 translations
+- XmlConvert and its role in formatting and parsing for XML
+- Type converters and their role in formatting and parsing
+- BitConverter, for binary conversions
+
+### **Convert**
+
+.Net framework base types = char, string, Datetime(Offset), all numeric types and boolean.
+All base types implement IConvertible which defines methods for converting to every other base type. The implementation of these methods simply calls a method in Convert.
+
+Convert's numerical conversion methods address just this issue; they always round:
+```
+double d = 3.9;
+int i = Convert.ToInt32(d); // i == 4
+```
+Convert uses *banker's rounding*, which snaps midpoint values to even integers. Banker's rounding rounds to the closest even number: 0.5 -> 0 and 1.5 -> 2.
+
+#### **Parsing numbers in base 2, 8, 16**
+```
+int thirty = Convert.ToInt32("1E", 16); // Parsed Hexadecimal
+```
+
+#### **Dynamic conversions**
+
+Convert has a method called ```.ChangeType``` which allows for runtime converting between base types. This allows e.g. when using a serializer to serialize different types to int at runtime.
+
+### XMLConvert
+
+XML converters allow for serialization of all types to be correctly used in an XML File, e.g. a boolean is true in XML not 'True'. XMLConvert takes all of this into account when serializing
+
+### Type Converters
+
+TypeConverters are designed to format and parse in design-time environments. TypeConverters can be fetched by using the ```TypeDescriptor.GetConverter``` method.
+
+```
+TypeConverter cc = TypeDescriptor.GetConverter(typeof(Color));
+Color beige = (Color)cc.ConvertFromString("Beige");
+```
+
+## **Globalization**
+
+There are 2 aspects to internationalizing an application: globalization and localization.
+
+**Globalization**
+- Making sure that program doesn't break when run in another culture
+- Respecting a local culture's formatting rules, e.g. when displaying dates
+- Designing the program so it picks up culture-specific data and strings from satellite assemblies.
+
+Localication means concluding the last task by writing satellite assemblies for specific cultures.
+
+### Testing
+
+When testing globalization, change the treads' culture to ensure that everything is working as intended
+```
+Thread.CurrentThread.CurrentCulture = CultureInfo.GetCultureInfo("tr-TR"); // Turkey is a great example
+```
+
+## Working with numbers
+
+### BigInteger
+
+It is possible to represent huge numbers e.g. (10^100), one googol by using a BigInteger. A bigInteger can store huge numbers without loss of precision.
+
+### Complex
+
+Complex numbers is used for representing complex numbers. The complex class is initialized using either Real & Imaginary part or using the Phase and Magniture (FromPolarCoordinates)
+
+### Random
+
+A dangerous part of Random is that it's not thread safe. Using the same random for multiple threads may cause issues.
+
+Random is not considered random enough for high-security applications such as cryptography. For this, the .NET Framework provides a cryptographically strong random number generator.
+
+## Enums
+
+C# supports enums through the System.Enum type. This type has 2 roles:
+- Providing type unification for all enum types
+- Defining static utility methods
+
+### Enum conversions
+
+```Enum.GetValues``` returns an array comprising all members of a particular enum type (composite members included.)
+
+```Enum.GetValues``` returns the same but as an array of *strings*
+
+> Important to note is that the CLR implements those 2 methods by reflecting over fields in the enum's type, the results are cached for efficiency.
+
+### How Enums work
+
+At runtime there is no differnece between an enum instance and its underlying integral value. Further, an enum definition in the CLR is erely a subtype of SYstem.ENum with static integral-type fields for each member. This makes enums highly efficient.
+
+Issue is that in code you could do 
+```
+BorderSides b = BorderSides.Left;
+b += 1234; // No Error!
+```
+No strong type safety, only static one.
+
+You'd expect that .ToString() at runtime just returns an Integer. Howver, C# explicitly boxes an enum instance before calling its virtual methods such as TOString or GetType() when an enum is boxed it gets a runtime wrapping that references its enum type.
+
+## The Guid Struct
+
+The Guid struct represents a globally unique identifier. a 16-byte value that when generated is almost unique in the world.
+
+As it's a value type, the GUID honors value-type semantics and thus equality operator works in the preceding example.
+
+## Equality comparison
+
+Equality comparison (==, !=) is more complex than inherently visible. Sometimes additional methods and interfaces are necessary.

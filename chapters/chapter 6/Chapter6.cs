@@ -17,7 +17,7 @@ namespace csharp7.chapters.Chapter6
 
         public override void RunExamples(){
             CompositeFormat();
-
+            StandardStringFormatTest();
         }
 
         public void CompositeFormat(){
@@ -29,6 +29,13 @@ namespace csharp7.chapters.Chapter6
             }
 
             decimal fivePointTwo = decimal.Parse("£5.20", System.Globalization.NumberStyles.Currency, CultureInfo.GetCultureInfo("en-GB"));
+        }
+
+        public void StandardStringFormatTest(){
+            double number = 0.2;
+
+            string compositeFormatString = "Rounding Test: {0:F2}";
+            WriteLine(string.Format(compositeFormatString, number));
         }
     }
 }
