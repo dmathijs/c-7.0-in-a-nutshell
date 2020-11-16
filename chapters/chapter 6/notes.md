@@ -325,3 +325,16 @@ As it's a value type, the GUID honors value-type semantics and thus equality ope
 ## Equality comparison
 
 Equality comparison (==, !=) is more complex than inherently visible. Sometimes additional methods and interfaces are necessary.
+
+### Value versus Referential Equality
+
+There are 2 kinds of equality:
+
+- Value equality
+  - Two values are equivalent in some sense.
+- Referential equality
+  - Two references refer to exactly the same object.
+  
+By default, structs exhibit a special kind of value equality called **structural equality** which checks that all members are the same.
+
+By default, reference type will exhibit referential equality.
