@@ -1,4 +1,4 @@
-# Chapter 6
+# Chapter 6 - Framework Fundamentals
 
 All types in this section reside in the *System* namespace, except for the following 
 - Stringbuilder: System.Text
@@ -338,3 +338,91 @@ There are 2 kinds of equality:
 By default, structs exhibit a special kind of value equality called **structural equality** which checks that all members are the same.
 
 By default, reference type will exhibit referential equality.
+
+### Standard equality protocol
+
+There are 3 standard protocols for equality comparison
+
+- The == and the != operator
+- the virtual Equals method in object (remember unified type system)
+- The IEquatable\<T> interface
+
+When using Equals on a struct, Equals performs structural comparison by calling Equals on each of the fields.
+
+Because == operator is statically resolved, it executes extremely quickly. This means that you can write computationaly intensive code without penalty.
+
+### Static methods object.Equals vs  object.ReferenceEquals
+
+Object offers 2 static method to compire objects at runtime. object.ReferenceEquals will execute referential equality while object.Equals will execute structural equality.
+
+### THe IEquatable\<T> interface
+
+Consequence of calling object.Equals is that it forces boxing on value types. This is undesirable in highly performance-sensitive scenarios because boxing is relatively expensive. To solve this, the IEquatable\<T> interface was introduced.
+
+```
+public interface IEquatable<T>
+{
+  bool Equals (T other);
+}
+```
+
+The Equals method always returns true for x.Equals(x) while x == x will not always return true; e.g. when using ```x = double.NaN``` 
+
+The default structural equality comparison algorith on structs is relatively slow. Taking over this process by overriding Equals can improve performance by a factor five.
+
+### GetHashCode
+
+Both reference and value types have default implementations of GetHashCode, meaning you don't need to override this method, *unless you override* Equals.
+
+Important for ```object.GetHashCode```
+
+- It must return the same value on two objects for which Equals returns true
+- It must not throw exceptions.
+- It must return the same value if called repeatedly on the same object
+
+For reference types, the GetHashCode is based on an internal object token, which is unique for each instance in the CLR's current implementation.
+
+### Implementing IEquatable<T>
+
+Both Equals and the == operator on system.string use *ordinal* comparison, which compares the Unicode point value of each character.
+
+See example.
+
+## **Order Comparison**
+
+C# and .NET also define standard protocols for determining the order of one object relative to another. The basic protocols are:
+
+- The IComparable Interfaces (IComparable and IComparable\<T>)
+- The > and < operators
+
+e.g.
+```
+string[] colors = { "Green", "Red", "Blue" }
+Array.Sort(colors);
+```
+
+This works because System.String implements the IComparable interfaces.
+
+### IComparable
+
+- if a comes before b, a.CompareTo(b) returns a positive number
+- if a is the same as b, a.CompareTo(b) returns 0
+- if a comes after b, a.CompareTo(b) returns a negative number
+
+### Overloading > and <
+
+Often, it doesn't make much sens to overload the > and < operators, typically it's only done when:
+- A type has a string intrinsic concept of "greather than" and "less than"
+- There is only one way or context in which to perform the comparison.
+- The result is invariant accross cultures.
+
+## Utility classes
+
+### Process
+
+The process class in System.Diagnostics allows you to launch a new process.
+
+### AppContext
+
+The System.AppContext class is new to Framework 4.6. It provides a global string keyed dictionary of Boolean values and is intended to offer library writers a standard mechanism for allowing consumers to switch new features on or off.
+

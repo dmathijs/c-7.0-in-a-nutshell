@@ -38,4 +38,33 @@ namespace csharp7.chapters.Chapter6
             WriteLine(string.Format(compositeFormatString, number));
         }
     }
+
+
+    ///<summary>
+    /// Example of an IEquatable<Area> implementation
+    ///</summary>
+    public struct Area : IEquatable<Area>
+    {
+        public readonly int Measure1;
+        public readonly int Measure2;
+
+        public Area(int m1, int m2){
+            Measure1 = Math.Min(m1, m2);
+            Measure2 = Math.Max(m1, m2);
+        }
+
+        // unboxing?
+        public override bool Equals(object other)
+        {
+            if(!(other is Area)) return false;
+            return Equals((Area) other);
+        }
+
+        public bool Equals (Area other) // Implements IEquatable<Area>
+            => Measure1 == other.Measure1 && Measure2 == other.Measure2;
+
+        public override int GetHashCode()
+            => Measure2 * 31 + Measure1; // 31 = some prime number
+    }
+
 }
