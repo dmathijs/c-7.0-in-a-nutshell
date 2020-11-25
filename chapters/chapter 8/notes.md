@@ -117,3 +117,98 @@ The into keyword lets you "continue" a query after projection and is a shortcut 
 into can be used after a elect or a groupe clause, it "restarts" a query.
 
 ## Projection strategies
+
+### Object intializers
+
+Project objects instead of scalar types, output is IEnumerable\<T> where T:class
+It is also possible to use anonymous types. Note that when using anonymous types. The compiler uses a self-generated type. This means that we do not know the return type of our IEnumerable. This is a scenario where using var is the only solution.
+
+it is possible to use 'let' and introduce a new variable next to the initial range variable.
+
+```
+from n in names
+let vowelless = n.Replace("a", "").Replace("e", "")..
+orderby vowelless
+select n;
+
+```
+
+## Interpreted queries
+
+LINQ provides 2 architectures: local queries for local object collections and interpreted queries for remote data sources.
+
+Interpreted queries are descriptive. They operate over sequences that implement IQueryable\<T> and they resolve to the query operators in the Queryable class which emits expression trees that are interpreted at runtime.
+
+There are 2 IQueryable<T> implementations in the .NET Framework
+- LINQ to SQL
+- Entity Framework (EF)
+
+> IQueryable\<T> is an extension of IEnumerable\<T> with additional methods for constructing expression trees.
+
+example:
+
+```
+DataContext dataContext = new DataContext("Connection string");
+Table<Customer> customers = dataContext.GetTable<Customer>();
+
+IQueryable<string> query = from c in customers
+where c.Name.Contains("a")
+select c.Name.ToUpper();
+```
+
+### How interpreted queries work
+
+First the compiler converts query syntax to fluent syntax. This is exactly as what is done in local queries.
+
+Next the compiler resolves the query operator methods. For local queries the query operators are resolved in the Enumerable Class, for interpreted queries the query operators are resolved in the Queryable. The compiler chooses the Queryable because Table implements IQueryable and IQueryable has a more specific match.
+
+The compiler translates the lambda function to an expression tree. **An expression tree is an object model based on the types in System.Linq.Epxressions** that can be inspected at runtime.
+
+### Execution
+
+Interpreted queries also follow a deferred execution model. This means that the SQL statement is not generated until the query is enumerated.
+
+Interpreted queries work differently in that they don't have the 'belt' system local queries have. The expression tree gets translated once to a complete SQL query.
+
+Some LINQ queries have no SQL translation, this will result in a runtime error
+
+### Combining interpreted and local queries
+
+```
+IEnumerable<string> q = customers
+    .Select(c => c.Name.ToUpper())
+    .Pair()                           // Custom extension method: becomes local
+    .Select((n, i) => "Pair " + i.ToString())
+```
+
+### .AsEnumerable
+
+It's purpose is to cast an IQueryable\<T> sequence to IEnumerable\<T>, forcing subsequent query operators to bind to Enumerable operators instead of queryable operators.
+
+Casting to AsEnumerable doesn't force immediate query execution.
+
+## LINQ to SQL and Entity Framework
+
+In this chapter, we examine L2S and EF to demonstrate interpreted queries. EF and L2S are currently supported by the ADO.NET team. The team focused its efforts on the EF and thus L2S hasn't been getting anymore big updates.
+
+EF supports other database servers than SQL server via a provider model.
+
+### DataContext and ObjectContext
+
+After defining the entity classes, the querying can begin. For this in L2S you create a DataContext, for EF you use the ObjectContext
+
+DataContext/ObjectContext does 2 things
+- Works as factory for genrating objects that you can query
+- Keeps track of changes so they can be persisted
+
+In EFCore instead of objectcontext, we use an "DbContext"
+
+DataContext/ObjectContext can be disposed but this is almost never necessary as EF and L2S close connections automatically whenever you finish retrieving results.
+
+#### **Object tracking**
+
+The DataContext/ObjectContext instance keeps track if the entities in instantiates and returns the same entity for the same row that is requested.
+
+This means that querying the same object twice will return the same object even though the second time, the object has potentially changed in the database.
+
+You can use the refresh call to refresh an entity to ensure that no old data is used.

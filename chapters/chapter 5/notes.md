@@ -44,7 +44,7 @@ Above the provider layer are three APIs that offer the ability to uery databases
 - Entity Framework Core
 - LINQ to SQL (.NET framework only)
 
-LINQ to SSQL is simpler than entity framework and has historically produced better SQL. Entity framework is more flexible in that you can create ellaborate mappings.
+LINQ to SQL is simpler than entity framework and has historically produced better SQL. Entity framework is more flexible in that you can create ellaborate mappings.
 
 ## Web API vs MVC API
 
