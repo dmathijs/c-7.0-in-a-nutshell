@@ -6,6 +6,7 @@ using System.Collections.ObjectModel;
 using System.Runtime.CompilerServices;
 using System.Globalization;
 using System.Linq;
+using System.Linq.Expressions;
 
 namespace csharp7.chapters.Chapter8
 {
@@ -19,6 +20,7 @@ namespace csharp7.chapters.Chapter8
 
         public override void RunExamples(){
             QueryExpressions();
+            ExpressionTreeExample();
         }
 
         ///<summary>
@@ -33,6 +35,24 @@ namespace csharp7.chapters.Chapter8
             foreach(var item in test){
                 WriteLine(item);
             }
+        }
+
+        private void ExpressionTreeExample(){
+
+            // Start by defining the parameterepxression 
+            ParameterExpression p = Expression.Parameter(typeof(string), "s");
+
+            MemberExpression stringLength = Expression.Property(p, "Length");
+            ConstantExpression five = Expression.Constant(5);
+
+            BinaryExpression comparison = Expression.LessThan(stringLength, five);
+
+            Expression<Func<string, bool>> lambda = Expression.Lambda<Func<string, bool>>(comparison, p);
+
+            Func<string, bool> runnable = lambda.Compile();
+
+            WriteLine(runnable("kangaroo"));
+            WriteLine(runnable("dog"));
         }
     }
 }

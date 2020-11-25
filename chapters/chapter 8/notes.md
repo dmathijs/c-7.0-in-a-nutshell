@@ -212,3 +212,59 @@ The DataContext/ObjectContext instance keeps track if the entities in instantiat
 This means that querying the same object twice will return the same object even though the second time, the object has potentially changed in the database.
 
 You can use the refresh call to refresh an entity to ensure that no old data is used.
+
+#### **Assocations**
+
+Associations is allowing to query related tables in a context by using foreign keys. 
+Associations are auto-generated and added as an attribute to a tables' property by checking foreign keys and its constraints (unique/non-unique) over all tables.
+
+### Deferred execution in L2S and EF
+
+- With local queries, when using a subquery, the subquery will only execute when enumerating AFTER enumerating the outer query
+- With L2S/EF (interpreted queries) subqueries are executed at the same time as the main author query. This avoids excessive round-tripping
+
+```
+query = from c in context.Customers // Access customers property within DataContext
+        select
+            from p in c.Purchases
+            select new { c.Name, p.Price }
+
+foreach (var row in query)
+    foreach(Purchase p in row.Purchases) // No extra round-tripping
+        WriteLine(...)
+```
+
+DeferredLoadingEnabled is an option that can be used to apply lazy (deffered) execution of the subquery. This can be usefull if e.g. something has to be checked before accessing purchases.
+
+## Building query expressions
+
+### Delegate vs expression trees
+
+- Local queries, which use Enumerable operators, take delegates.
+- Interpreted queries, which use Queryable operators, take expressions.
+
+Embedded within a query, a lambda expression looks identical wheter it binds to Enumerable's operators or Queryable's operators.
+
+Expression Trees can be converted to delegates by calling .Compile
+
+### The expression DOM
+
+AN expression tree is a miniature code DOM. each node in the tree is represented by a type in System.Linq.Expressions namespace.
+Code block type lambda expression cannot be converted to expression tree.
+
+The base class for all nodes is the Expression class. The generic Expression\<TDelegate> class actually means "typed lambda expression". Expression\<T>'s base type is the LambdaExpression class.
+
+The thing that distinguishes LambdaExpressions from ordinary Expressions is that LambdaExpressions have parameters.
+
+```
+Expression<Func<string, bool>> f = s => s.Length < 5
+```
+
+LambdaEpression
+- BinaryExpression (NodeType = LessThan)
+  - MemberExpression (Member.Name = "Length", Type = System.Int32)
+    - ParameterExpression (Name="s", Type=System.String)
+  - ConstantExpression (Value = 5)
+
+
+### Building own expression tree
