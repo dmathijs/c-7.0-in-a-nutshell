@@ -7,8 +7,6 @@ using System.Runtime.CompilerServices;
 using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
-using BenchmarkDotNet.Attributes;
-using BenchmarkDotNet.Running;
 
 namespace csharp7.chapters.Chapter9
 {
