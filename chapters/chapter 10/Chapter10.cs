@@ -7,6 +7,7 @@ using System.Runtime.CompilerServices;
 using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Xml.Linq;
 
 namespace csharp7.chapters.Chapter10
 {
@@ -19,6 +20,14 @@ namespace csharp7.chapters.Chapter10
         }
 
         public override void RunExamples(){
+            XDOMInstantiation();
+        }
+
+        public void XDOMInstantiation(){
+            XElement element = new XElement("lastname", "Bloggs");
+            element.Add(new XComment("nice name"));
+
+            WriteLine(element.ToString());
         }
     }
 }
