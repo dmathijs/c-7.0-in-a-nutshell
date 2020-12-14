@@ -127,3 +127,32 @@ Namespaces can also be appointed to attributes. e.g.
 ```
 
 ### Specifying namespaces in the X-DOM
+
+To define a namespace in code, add the namespace with curlybrazes before the local name.
+```
+var e = new XElement("{http://diederikmathijs.be/xmlspace}customer", "Bloggs");
+```
+
+The second appreach is to use the XNamespace and XName type.
+```
+XNamespace ns = "http://domain.com/xmlsapce";
+var data = new XElement(ns + "data");
+```
+
+### Prefixes
+
+Using prefixes in code can be done by setting attributes on the root element.
+```
+mix.SetAttributeValue(XNameSpace.Xmlns + "ns1", ns1);
+```
+This will result in any ns1 element to have the ns1 prefix.
+
+## Annotations
+
+Custom data can be attached to any XObject and is meant strictly for private use.
+
+## Projecting into an X-DOM
+
+### Streaming a projection
+
+When projecting into X-DOM only to save it, you can improve memory efficiency through an XStreamingElement. An XStreamingElement is a cut-down version that applies deferred loading. This means that queries passed into XStreamingElement's constructor are not enumerated until you call Save, toString(). This avoids that the whole X-DOM get's loaded into memory at once.

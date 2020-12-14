@@ -9,12 +9,12 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Xml.Linq;
 
-namespace csharp7.chapters.Chapter10
+namespace csharp7.chapters.Chapter11
 {
-    public class Chapter10 : ChapterModule
+    public class Chapter11 : ChapterModule
     {
 
-        public Chapter10():base("Chapter 10")
+        public Chapter11():base("Chapter 11")
         {
 
         }

@@ -61,3 +61,7 @@ An XML document can be validated before processing it. There are a number of rea
 Set the XmlSchemaValidationType on the reader/writer settings.
 
 When you are interested in picking up all the errors in the documents. XmlReader/Writer-settings allows a ValidationEventHandler delegate on which the multicast allows for handling every error when validating an exception
+
+## XSLT (Extensible stylesheet language transformations)
+
+It describes how to transform one XML Language into another. An example of such transformation is transforming an XML document into an XHTMLdocument
