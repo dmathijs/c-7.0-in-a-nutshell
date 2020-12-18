@@ -187,3 +187,33 @@ When using unmanaged memory to the application. The CLR will get a unrealistical
 
 ## Managed Memory Leaks
 
+Usually managed memory leaks are easier to diagnose and prevent. Managed memory leaks  are caused by unused objects remaining alive. A common candidate is event handlers, these hold reference to the target object.
+
+Solution is to make objects IDisposable and remove them during the dispose call
+```csharp
+public void Dispose() { _host.Click -= HostClicked; }
+```
+
+Another example is Timers, starting a timer without disposing it, will prevent objects containing the time object to be GC. (System.Timers). That is because the .NET Framework itself holds a reference to active timers so that their Elapsed events can be raised.
+
+The Timer in System.Threading is different, the .NET Frameworks keeps no references to active threading timers and thus a finalizer will be ran, which automatically disposes and stops a timer.
+
+Memory profiling tools: windbg.exe, Microsoft's CLR Profiler, SciTech's Memory Profiler and Red Gate's ANTS Memory Profiler.
+
+## Weak References
+
+```WeakReference``` class allows to keep a weak reference to an object, it can be usefull to keep track to keep of all items that have been instantiated without preventing the items to be collected by the GC.
+
+```csharp
+var weak = new WeakReference(new StringBuilder("weak"));
+var sb = (StringBuilder) weak.Traget;
+if(sb != null) { /* so something with wb */ }
+```
+
+### Weak References and Caching
+
+Use a weakreference to keep a field value cached, ofcourse this may not really be effective in practice as the GC fires and selects what generation to collect.
+
+### Weak References and Events
+
+Before it was clear that events would keep strong reference and thus prevent items from being collected.

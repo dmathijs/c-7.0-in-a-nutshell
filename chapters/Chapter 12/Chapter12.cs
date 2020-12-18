@@ -33,10 +33,30 @@ namespace csharp7.chapters.Chapter12
         }
     }
 
-    class Test{
-
-        ~Test(){
-            WriteLine("Finalizer Run");
+    class Test : IDisposable
+    {
+        public void Dispose()
+        {
+            Dispose (true);
+            // This will prevent the GC from running the finalize when collecting
+            // This improves performance as the Dispose won't be ran a second time.
+            GC.SuppressFinalize (this);
+        }
+        // Prevent finalizer from running.
+        protected virtual void Dispose (bool disposing)
+        {
+            if (disposing)
+            {
+            // Call Dispose() on other objects owned by this instance.
+            // You can reference other finalizable objects here.
+            // ...
+            }
+            // Release unmanaged resources owned by (just) this object.
+            // ...
+        }
+        ~Test()
+        {
+            Dispose (false);
         }
     }
 }
