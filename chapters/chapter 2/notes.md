@@ -17,7 +17,7 @@ statements can wrap multiple lines, they are ended by the ';' punctuator
 
 ```
 console.writeline
-('this shows warpping');
+('this shows wrapping');
 ```
 
 ### Predefined types
@@ -57,7 +57,7 @@ Explicit conversion allowed if:
 - Pointer types (Chapter 4)
 
 A value type contains it's value. A reference type has 2 parts: an object and a reference to that object. Multiple references can point to the same object.
-A reference type can be assignet the literal null. A value cannot have a null value.
+A reference type can be assigned the literal null. A value cannot have a null value.
 
 > Interesting is that an int, although being only 32 bits (4 bytes), the actual space the CLR will appoint is up to 8 bytes (this behaviour can be overwritten using the StructLayout (see page 975))
 
