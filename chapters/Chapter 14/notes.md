@@ -162,4 +162,12 @@ An Awaiter has only 2 methods. OnCompleted and GetResult and a boolean property 
 
 If a synchronization context is present, OnCompleted automatically captures it and posts the continuation to that context. This means that the continuation will execute in the main thread. Preventing this can be done using the ```.ConfigureAwait(false)```. If no synchronization context is present or you use ```.ConfigureAwait(false)```, the continuation will execute on the same thread as the antecedent, avoiding unnecessary overhead.
 
-Another way of attaching a continuation is by calling the tasks' ```ContinueWith``` method
+Another way of attaching a continuation is by calling the tasks' ```ContinueWith``` method. ContinueWith will create a new task. Important is that you must deal directly with the AggregateException. Also, it is important to ad the ```TaskContinuationOptions.ExecuteSynchronously``` if you want to continue exectuion on the same thread.
+
+### TaskCompletionSource
+
+TaskCompletionSource lets you create a task out of any operation. It works by giving you a "slave" task that you manually drive, this is ideal for I/O bound as you get all the benefits of tasks without blocking the thread for the duration of the operation.
+
+
+
+
