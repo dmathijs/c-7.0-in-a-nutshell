@@ -88,7 +88,7 @@ The simplest use is the ManualResetEvent. Calling .WaitOne() on the signal will 
 
 long-running operations on the main thread makes appliation unresponsive because the main thread also processes the message loop that performs rendering and handles keyboard and mouse events.
 
-All worker threads need to forward UI changes to the UI thread. Viaolating this causes either unpredictable behavior or an exception to be thrown.
+All worker threads need to forward UI changes to the UI thread. Violating this causes either unpredictable behavior or an exception to be thrown.
 
 E.g. WPF (windows presentation foundation) needs you to run ```.BeginInvoke(action)``` on the 'Dispatcher', the 'Dispatcher' being the UI element you interacted with. 
 
@@ -168,6 +168,130 @@ Another way of attaching a continuation is by calling the tasks' ```ContinueWith
 
 TaskCompletionSource lets you create a task out of any operation. It works by giving you a "slave" task that you manually drive, this is ideal for I/O bound as you get all the benefits of tasks without blocking the thread for the duration of the operation.
 
+## Principles of Asynchrony
 
+### Synchronous versus asynchronous operations
 
+A *synchronous operation* does its work *before* before returnning to the caller.
+A *Asynchronous operation* does (most of all of) its work *after* returnning to the caller.
+
+Examples of general-purpose async methods are:
+- Thread.Start
+- Task.Run
+- Methods that attach to conntinuations to tasks ( ```.ContinueWith()``` and ```.OnComplete()``` )
+
+### What is asynchronous programming?
+
+Concurrency is initiated *inside* the long-running function, rather than outside the function (e.g. by starting a thread). This has 2 benefits
+
+- I/O-bound concurrency can be implemented without tying up threads, improving scalability
+- Rich-client applications end up with less code on worker threads, simplyfing thread safety.
+
+This leads to 2 uses for asynchronous programming. Thread efficiency; not consuming a thread per network request. Second, Thread Safety. With traditional synchronous call graph, any operation within the graph is long-running and the entire call graph must be run on a worker thread (*coarse-grained concurrency*) to maintain responsive UI. With asynchronous call graph, we need not start a thread until it's actually needed. This results in *fine-grained concurrency* - a sequence of small concurrent operations in between which execution bounces to the UI thread.
+
+> It is important to note that *excessively fine-grained asynchrony* can hurt performance because asynchronous operations incur an overhead
+
+### Why Language Support is Important
+
+If no await keywoard would exist, we would need a TaskCompletionSource definition and await manipulation of it's OnCompleted method in order to have the desired behavior.
+
+Instead we can now do:
+
+```csharp
+async Task DisplayPrimeCountsAsync()
+{
+    await _task;
+    WriteLine('Done!');
+}
+
+```
+
+Async/await are essential for implementing asynchrony without excessive complexity. If you want to execute query operators over the result, one can use Reactive Framework (Rx)
+
+## Asynchronous Functions in C#
+
+C# 5.0 introduced the async and await keywords.
+
+### **Awaiting**
+
+Simplifies attaching of continuations. The compiler will expend
+
+```csharp
+var result = await expression;
+statement(s);
+```
+into
+```csharp
+var awaiter = expression.GetAwaiter();
+awaiter.OnCompleted(() => 
+{
+    var result = awaiter.GetResult();
+    statement(s);
+})
+```
+
+### **Async**
+
+The async modifier tells the compiler to treat await as a keyword rather than an identifier should ambiguity arise within the method. Async modifier can only be applied to methods that return void, Task or Task\<TResult>.
+
+> Note that is it is legal to introduce async when overriding an non async virtual method, as long as the signature is kept the same.
+
+Upon encountering an awayt expression, execution returns to the caller and the CLR attaches a continuation to the awaited tasks, ensuring that when the task completes, execution jumps back into method and continues where it left off, returning the value or re-throwing the exception.
+
+Coarse-grained concurrency put's the concurrency high in the calling tree, in a UI application this will force us to call Dispatcher.BeginInvoke(..) littering the code.
+
+### Writing Asynchronous Functions
+
+> There's not really a cost to bubbling up asynchronous call graphs, other than the first "bounce"
+
+#### **Parallelism**
+
+```csharp
+var task1 = PrintAnswerToLife();
+var task2 = PrintAnswerToLife(); // This will execute both tasks simultaneously as both are already launched
+await task1; await task2; // By awaiting we end the parallelism as we're waiting on one of the tasks
+```
+
+### Asynchronous Methods in WinRT
+
+In WinRT, the equivalent of Task is IAsynCAction and the equivalent of Task\<TResult> is IAsyncOperation\<TResult>.
+
+### Asynchrony and Synchronization context.
+
+Depending on wheter a synchronization context is available, continuations will execute on the same thread or on the UI Thread. 
+
+#### **Exception Posting**
+
+It is essential to rely on central exception handling to process unhandled exceptions thrown in the UI Thread, in ASP.NET this is done in the Application_Error in global.asax.
+
+When throwing an exception after the execution returns  to the message loop, the message loop can't catch the exception. To mitigate this, AsyncVoidMethodBuilder catches unhandled exceptions and posts them to the synchronization context if present. Ensuing that global exception-handling still fires.
+
+(!) This logic is only applied to void-returning async functions. If the return type was Task this would result in an *unobserved* exception.
+
+Interesting note for iterators: 
+```csharp
+IEnumerable<int> Foo() { throw null; yield return 123; }
+```
+
+WIll only throw once it's enumerated, same goes for async functions. Only upon awaiting will the exception be posted to the synchronization context.
+
+If a synchronization context is present, void-return async functions also call its OperationStarted method upon entering the function and OperationCompleted upon leaving.
+
+### Optimizations
+
+#### **Completing synchronously**
+
+Synchronous completion is when an async task returns a result that was already available.
+The compiler will short circuit exactly for this behavior. An await will be implemented as
+```csharp
+var awaiter = GetWebPageAsync().GetAwaiter();
+if (awaiter.IsCompleted) // Is run if the page was in cache
+    Console.WriteLine(awaiter.GetResult())
+else
+    awaiter.OnCompleted(() => ...);
+```
+
+Imagine that we're requesting the same page multiple times using a cache will result in multiple page visits and the last one being inserted in the cache. Instead the cache could contain the tasks so that these can be awaited (and will return the same result)
+
+#### **Avoiding excessive boucing**
 
