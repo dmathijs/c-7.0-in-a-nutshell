@@ -13,10 +13,12 @@ namespace csharp7.chapters.Chapter14
         {
         }
 
-        public override void RunExamples(){
+        public async override void RunExamples(){
             ThreadCreationCode();
             StartTask();
             TaskException();
+            // TestSimultaneousConcurrency();
+            await TestCancellationToken();
         }
 
 
@@ -37,6 +39,42 @@ namespace csharp7.chapters.Chapter14
             // may not execute before our application ends
             // Threadpool threads ARE ALWAYS backgroundthreads
             Task.Run(() => WriteLine("Foo"));
+        }
+
+        private async void TestSimultaneousConcurrency(){
+            Task t1 = StartTask("t1");
+            Task t2 = StartTask("t2"); // Defining a task does not start it!
+
+            await t1; await t2;
+            return;
+        }
+
+        private async Task TestCancellationToken(){
+            var token = new CancellationTokenSource();
+            // create a task
+            await DoSomething(token.Token).ConfigureAwait(false);   
+            // will this happen?
+            // token.CancelAfter(5000);
+            WriteLine("this is a test");
+        }
+
+        private async Task DoSomething(CancellationToken token){
+            try{
+                for(int i = 0; i < 100; i++){
+                    WriteLine($"Testing {i}");
+                    await Task.Delay(100);
+                }
+            }catch(Exception e){
+                WriteLine(e);
+            }
+        }
+
+        private async Task StartTask(string caller){
+
+            for(int i = 0; i < 5; i++){
+                Thread.Sleep(500);
+                WriteLine($"Called by {caller}");
+            }
         }
 
         private void TaskException(){

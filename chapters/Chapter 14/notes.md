@@ -70,7 +70,7 @@ in WPF, UWP and windows forms applications, you can subscribe to a "global" exce
 
 ### Foreground Versus Background Threads
 
-By default, threads are foreground threads. Foreground threads keep the application alive for as long as any of them is running. Backgroudn threads do not. This can be toggled by using the ```.IsBackground``` flag on the thread object. 
+By default, threads are foreground threads. Foreground threads keep the application alive for as long as any of them is running. Background threads do not. This can be toggled by using the ```.IsBackground``` flag on the thread object. 
 
 ### Thread priority
 
@@ -92,7 +92,7 @@ All worker threads need to forward UI changes to the UI thread. Violating this c
 
 E.g. WPF (windows presentation foundation) needs you to run ```.BeginInvoke(action)``` on the 'Dispatcher', the 'Dispatcher' being the UI element you interacted with. 
 
-Differenet windows can get their own UI Threads (= main threads).
+Different windows can get their own UI Threads (= main threads).
 
 ### Synchronization Contexts
 
@@ -106,7 +106,7 @@ Easiest way to run something in the threadpool is to run ```Task.Run(() => ...);
 
 #### **Hygiene in the threadpool**
 
-The threadpool also ensures that there's no CPU oversubscription. Oversubscription is when there are more active threads than CPU cores, which causes the OS to have to time-slice. Oversubscripition hurts performance because time-slicing requires expensive context swithces and can invalidate CPU caches that have become essential in delevering performance to modern processors.
+The threadpool also ensures that there's no CPU oversubscription. Oversubscription is when there are more active threads than CPU cores, which causes the OS to have to time-slice. Oversubscripition hurts performance because time-slicing requires expensive context switches and can invalidate CPU caches that have become essential in delevering performance to modern processors.
 
 CLR avoids oversubscription by queueing taks and throttling their startup. **Hill-climbing algorithm** is used to adjust the workload in a particular direction.
 
@@ -162,7 +162,7 @@ An Awaiter has only 2 methods. OnCompleted and GetResult and a boolean property 
 
 If a synchronization context is present, OnCompleted automatically captures it and posts the continuation to that context. This means that the continuation will execute in the main thread. Preventing this can be done using the ```.ConfigureAwait(false)```. If no synchronization context is present or you use ```.ConfigureAwait(false)```, the continuation will execute on the same thread as the antecedent, avoiding unnecessary overhead.
 
-Another way of attaching a continuation is by calling the tasks' ```ContinueWith``` method. ContinueWith will create a new task. Important is that you must deal directly with the AggregateException. Also, it is important to ad the ```TaskContinuationOptions.ExecuteSynchronously``` if you want to continue exectuion on the same thread.
+Another way of attaching a continuation is by calling the tasks' ```ContinueWith``` method. ContinueWith will create a new task. Important is that you must deal directly with the AggregateException. Also, it is important to add the ```TaskContinuationOptions.ExecuteSynchronously``` if you want to continue exectuion on the same thread.
 
 ### TaskCompletionSource
 
@@ -206,6 +206,9 @@ async Task DisplayPrimeCountsAsync()
 
 ```
 
+A task technically doesn't execute, it represents an asynchronous operation.
+https://blog.stephencleary.com/2012/02/async-and-await.html
+
 Async/await are essential for implementing asynchrony without excessive complexity. If you want to execute query operators over the result, one can use Reactive Framework (Rx)
 
 ## Asynchronous Functions in C#
@@ -236,7 +239,7 @@ The async modifier tells the compiler to treat await as a keyword rather than an
 
 > Note that is it is legal to introduce async when overriding an non async virtual method, as long as the signature is kept the same.
 
-Upon encountering an awayt expression, execution returns to the caller and the CLR attaches a continuation to the awaited tasks, ensuring that when the task completes, execution jumps back into method and continues where it left off, returning the value or re-throwing the exception.
+Upon encountering an await expression, execution returns to the caller and the CLR attaches a continuation to the awaited tasks, ensuring that when the task completes, execution jumps back into method and continues where it left off, returning the value or re-throwing the exception.
 
 Coarse-grained concurrency put's the concurrency high in the calling tree, in a UI application this will force us to call Dispatcher.BeginInvoke(..) littering the code.
 
@@ -248,7 +251,7 @@ Coarse-grained concurrency put's the concurrency high in the calling tree, in a 
 
 ```csharp
 var task1 = PrintAnswerToLife();
-var task2 = PrintAnswerToLife(); // This will execute both tasks simultaneously as both are already launched
+var task2 = PrintAnswerToLife(); // This task won't start until it is awaited!!
 await task1; await task2; // By awaiting we end the parallelism as we're waiting on one of the tasks
 ```
 
@@ -294,4 +297,45 @@ else
 Imagine that we're requesting the same page multiple times using a cache will result in multiple page visits and the last one being inserted in the cache. Instead the cache could contain the tasks so that these can be awaited (and will return the same result)
 
 #### **Avoiding excessive boucing**
+
+Use .ConfigureAwait(false) in a loop to prevent bouncing back to the UIContext and causing excessive bouncing.
+
+## Asynchronous Patterns
+
+### Cancellation
+
+It is important to be able to cancel a concurrent operation. For this the CLR provides a type called 'CancellationToken'. 'CancellationToken' does not have a cancel method. That's because the consumer should not be able to cancel. Instead typically one would use 'CancellationTokenSource' like this:
+
+```csharp
+var cancelSource = new CancellationTokenSource();
+Task foo = Foo(cancelSource.Token);
+... (some time later...)
+cancelSource.Cancel();
+```
+
+Synchronous code supports cancellation to, however, the cancellation will need to be called from an asynchronous method.
+
+### Progress Reporting
+
+The CLR provides a pair of types to solve this problem. IProgress\<T> and Progress\<T>. Their purpose is to "wrap" a delgate so that UI applications can report progress safely through the synchronization context. Do this by calling ```Progress.Report(T value);```
+
+Progress\<T> has a ProgressChanged event which is fired on the context captured (e.g. the synchronizationcontext)
+
+### The Task-based Aynchronous Pattern (TAP)
+
+A TAP method
+- Returns a "hot" Task or Task\<TResult>
+- Has an Async Suffix
+- Is overloaded to accept a cancellation token and/or IProgress\<T>
+- Returns quickly to the caller
+- Does not tie up a thread if I/O-bound
+
+#### WhenAny
+
+```csharp
+int answer = await await Task.WhenAny(Delay1(), Delay2(), Delay3());
+```
+Why use await twice? First await will return the task that finished first. This means that we shouldn't have to await the task but directly access the result. **However** this means that exceptions won't be rehtrowed. To do so, await a second time.
+
+WhenAny is usefull in e.g. the scenario where you want to timeout without cancellation task. Just make one task a Task.Delay(500) and if another task hasn't finished by then, the operation will cancel.
 
