@@ -1,6 +1,7 @@
 using System;
 using static System.Console;
 using csharp7.infra;
+using System.Threading.Tasks;
 
 namespace csharp7.chapters.Chapter2
 {
@@ -25,7 +26,7 @@ namespace csharp7.chapters.Chapter2
 
         }
 
-        public override void RunExamples(){
+        public  async override Task RunExamples(){
             CheckedOperatorExample();
             SwapMethodImplementation();
             NullCoalescingIsRightAssociative();

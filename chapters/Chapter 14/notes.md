@@ -296,6 +296,12 @@ else
 
 Imagine that we're requesting the same page multiple times using a cache will result in multiple page visits and the last one being inserted in the cache. Instead the cache could contain the tasks so that these can be awaited (and will return the same result)
 
+```csharp
+Task.GetAwaiter().GetResult(); // Will throw exception directly
+vs
+Task.Result; // Will wrap the result in an aggregate exception
+```
+
 #### **Avoiding excessive boucing**
 
 Use .ConfigureAwait(false) in a loop to prevent bouncing back to the UIContext and causing excessive bouncing.
@@ -339,3 +345,8 @@ Why use await twice? First await will return the task that finished first. This 
 
 WhenAny is usefull in e.g. the scenario where you want to timeout without cancellation task. Just make one task a Task.Delay(500) and if another task hasn't finished by then, the operation will cancel.
 
+#### WhenAll/custom paterns
+
+### Obsolete patterns
+
+APM (Asynchronous programming model), EAP (Event based asynchronous pattern), BackgroundWorkers (these work on their separate threads and fire an event when done)

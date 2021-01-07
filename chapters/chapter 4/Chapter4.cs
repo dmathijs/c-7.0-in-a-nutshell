@@ -3,6 +3,7 @@ using static System.Console;
 using csharp7.infra;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 
 namespace csharp7.chapters.Chapter4
 {
@@ -14,7 +15,7 @@ namespace csharp7.chapters.Chapter4
 
         }
 
-        public override void RunExamples(){
+        public  async override Task RunExamples(){
             DelegateExample();
             LoopExampleToShowVariablesCapturedOutsideContext();
             EnumeratorExample();

@@ -1,8 +1,7 @@
 using System;
 using static System.Console;
 using csharp7.infra;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using System.Globalization;
 
 namespace csharp7.chapters.Chapter6
@@ -15,7 +14,7 @@ namespace csharp7.chapters.Chapter6
 
         }
 
-        public override void RunExamples(){
+        public  async override Task RunExamples(){
             CompositeFormat();
             StandardStringFormatTest();
         }

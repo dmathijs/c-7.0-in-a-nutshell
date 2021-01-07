@@ -1,14 +1,8 @@
 using System;
 using static System.Console;
 using csharp7.infra;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Runtime.CompilerServices;
-using System.Globalization;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Xml.Linq;
-using System.Threading;
+using System.Threading.Tasks;
+
 
 namespace csharp7.chapters.Chapter12
 {
@@ -20,7 +14,7 @@ namespace csharp7.chapters.Chapter12
 
         }
 
-        public override void RunExamples(){
+        public  async override Task RunExamples(){
             FinalizerExample();
         }
 

@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 
 namespace csharp7.infra
 {
@@ -10,11 +11,11 @@ namespace csharp7.infra
             Console.WriteLine($"Added module {name}");
         }
 
-        public void Run(){
+        public async Task Run(){
             Console.WriteLine($"Running examples for {name}");
-            RunExamples();
+            await RunExamples();
         }
 
-        public abstract void RunExamples();
+        public abstract Task RunExamples();
     }
 }

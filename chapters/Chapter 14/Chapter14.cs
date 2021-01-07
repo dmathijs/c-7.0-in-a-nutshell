@@ -13,7 +13,7 @@ namespace csharp7.chapters.Chapter14
         {
         }
 
-        public async override void RunExamples(){
+        public async override Task RunExamples(){
             ThreadCreationCode();
             StartTask();
             TaskException();
@@ -41,7 +41,7 @@ namespace csharp7.chapters.Chapter14
             Task.Run(() => WriteLine("Foo"));
         }
 
-        private async void TestSimultaneousConcurrency(){
+        private async Task TestSimultaneousConcurrency(){
             Task t1 = StartTask("t1");
             Task t2 = StartTask("t2"); // Defining a task does not start it!
 
@@ -51,9 +51,10 @@ namespace csharp7.chapters.Chapter14
 
         private async Task TestCancellationToken(){
             var token = new CancellationTokenSource();
+            // will this happen?
+            token.CancelAfter(100);
             // create a task
             await DoSomething(token.Token).ConfigureAwait(false);   
-            // will this happen?
             // token.CancelAfter(5000);
             WriteLine("this is a test");
         }
@@ -62,7 +63,7 @@ namespace csharp7.chapters.Chapter14
             try{
                 for(int i = 0; i < 100; i++){
                     WriteLine($"Testing {i}");
-                    await Task.Delay(100);
+                    await Task.Delay(10, token);
                 }
             }catch(Exception e){
                 WriteLine(e);

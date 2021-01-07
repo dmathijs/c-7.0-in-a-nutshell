@@ -3,8 +3,7 @@ using static System.Console;
 using csharp7.infra;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Runtime.CompilerServices;
-using System.Globalization;
+using System.Threading.Tasks;
 
 namespace csharp7.chapters.Chapter7
 {
@@ -16,7 +15,7 @@ namespace csharp7.chapters.Chapter7
 
         }
 
-        public override void RunExamples(){
+        public  async override Task RunExamples(){
             CollectionIListConstructorExample();
         }
 

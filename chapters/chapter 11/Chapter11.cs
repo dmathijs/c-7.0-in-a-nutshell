@@ -1,12 +1,7 @@
 using System;
 using static System.Console;
 using csharp7.infra;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Runtime.CompilerServices;
-using System.Globalization;
-using System.Linq;
-using System.Linq.Expressions;
+using System.Threading.Tasks;
 using System.Xml.Linq;
 
 namespace csharp7.chapters.Chapter11
@@ -19,7 +14,7 @@ namespace csharp7.chapters.Chapter11
 
         }
 
-        public override void RunExamples(){
+        public  async override Task RunExamples(){
             XDOMInstantiation();
         }
 
