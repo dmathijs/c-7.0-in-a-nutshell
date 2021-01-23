@@ -15,6 +15,7 @@ using csharp7.chapters.Chapter12;
 using csharp7.chapters.Chapter13;
 using csharp7.chapters.Chapter14;
 using csharp7.chapters.Chapter15;
+using csharp7.chapters.Chapter16;
 
 
 // Using C#9 top-level function doesn't require namespace definition
@@ -33,7 +34,8 @@ var modules = new List<ChapterModule>(){
     new Chapter12(),
     new Chapter13(),
     new Chapter14(),
-    new Chapter15()
+    new Chapter15(),
+    new Chapter16()
 };
 
 foreach(var module in modules){

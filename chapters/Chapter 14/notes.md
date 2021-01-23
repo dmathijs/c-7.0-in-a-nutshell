@@ -48,7 +48,7 @@ while(DateTime.Now < nextStartTime)
 
 while(DateTime.Now < nextStartTime);
 ```
-Not that blocking is not a ZERO COST operation, it ties up around 1MB of memory and causes onging administrative overhead for the CLR and the OS. for this a lot of blocking in heavily I/O-bound programs can be an issue.
+Note that blocking is not a ZERO COST operation, it ties up around 1MB of memory and causes onging administrative overhead for the CLR and the OS. for this a lot of blocking in heavily I/O-bound programs can be an issue.
 
 ### Local versus Shared State
 
