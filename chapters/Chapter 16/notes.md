@@ -89,3 +89,37 @@ WebClient, HttpClient and WebRequest all use SSL automatically when you specify 
 ## Writing an HTTP Server
 
 It is possible to write our own Http Server by using HttpListener. Internally, HttpListener does not use .NET Socket objects; instead it uses windows HTTP Server API which allows applications on a computer to listen on the same IP address and port--as long as each registers different address prefixes. 
+
+## Using DNS
+
+```DNS.GetHostAddresses()``` returns all IP addresses for a domain name. It can be an advantage to resolve the IP of a domain name using DNS, this will prevent excessive round-tripping
+
+## Sending mail with SMTP client
+
+The ```System.Net.Mail.SmtpClient``` allows for sending email through Simple Mail Transfer Protocol.
+
+## Using TCP
+
+with TCP in .NET, either the TcpClient and TcpListener facade classes can be used or the Socket class which is exposed on the TcpClient and -Listener using the Client property.
+
+An example of a TCPClient would be:
+
+```csharp
+using (TcpClient client = new TcpClient())
+{
+    client.Connect ("address", port);
+    using (NetworkStream n = client.GetStream())
+    {
+    // Read and write to the network stream...
+    }
+}
+
+```
+
+```await Task.Yield()``` ensures that the rest of a method is executed asynchronously.
+
+
+
+## Extra: The synchronization context: https://hamidmosalla.com/2018/06/24/what-is-synchronizationcontext/
+
+
